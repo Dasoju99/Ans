@@ -1,0 +1,43 @@
+- hosts: 172.31.6.191
+  become: yes
+  tasks:
+  - name: install open JDK
+    yum:
+      name: java-11-openjdk-devel
+      state: present
+  - name: Download Jenkins Repo
+    get_url: 
+      url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+      dest: /etc/yum.repos.d/jenkins.repo
+  - name: import rpm key
+    rpm_key:
+      key: https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+      state: present
+  - name: Install Epel release 
+    yum:
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm 
+      state: present
+      disable_gpg_check: yes
+  - name: install jenkins  
+    yum:
+      name: jenkins
+      state: present
+  - name: Start jenkins
+    service:
+      name: jenkins
+      state: started
+  - name: enable jenkins on Boot Starp
+    systemd:
+      name: jenkins
+      state: started
+  - name: Sleep for 30 Seconds or wait for port 8080 to be listening
+    wait_for:
+      delay: 30
+      port: 8080
+  - name: Get inint admin Password
+    shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+    register: jenkinspass
+  - name: Print jenkins password
+    debug:
+      var: jenkinspass.stdout
+

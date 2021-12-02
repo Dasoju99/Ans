@@ -1,0 +1,43 @@
+- hosts: sq
+  become: yes
+  vars:
+    son: sonar
+  tasks:
+  - name: Remove sonarqube existed folder from home dir
+    file:
+      path: /home/ansible/sonarqube-7.8
+      state: absent
+  - name: Remove sonarqube existed folder from opt dir
+    file:
+      path: /opt/sonarqube-7.8
+      state: absent
+  - name: Download Sonarqube7.8
+    get_url:
+      url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-7.8.zip
+      dest: /opt/sonarqube-7.8.zip
+  - name: unzipping file
+    shell: unzip /opt/sonarqube-7.8.zip 
+  - name: Moving
+    shell: mv /home/ansible/sonarqube-7.8 /opt/
+#  - name: sonar user delete
+#    shell: userdel sonar
+  - name: sonar user add 
+    shell: useradd sonar
+  - name: line add in visudo
+    lineinfile:
+      path: /etc/sudoers
+      line: 'sonar        ALL=(ALL)       NOPASSWD: ALL'
+      insertbefore: EOF
+  - name: chown
+    shell: chown -R sonar:sonar /opt/sonarqube-7.8/
+  - name: chmod
+    shell: chmod -R 775 /opt/sonarqube-7.8/
+    become_user: sonar
+  - name: goto sonar.sh location
+    shell: cd /opt/sonarqube-7.8/bin/linux-x86-64/
+  - name: start sonarqube server
+    shell: nohup sonar.sh start 
+
+
+
+

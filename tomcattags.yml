@@ -1,0 +1,49 @@
+#ansible-playbook tomcattags.yml --tags install
+
+- hosts: 172.31.3.116 
+  become: yes
+  tasks:
+  - name: install open JDK
+    tags:
+    - install
+    yum:
+      name: java-11-openjdk-devel
+      state: present
+  - name: Download Tomcat file
+    tags:
+    - install
+    get_url:
+      url: https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.55/bin/apache-tomcat-9.0.55.zip
+      dest: /opt/apache-tomcat-9.0.55.zip
+  - name: Remove tomcat existed folder
+    tags:
+    - install
+    file:
+      path: /home/ansible/apache-tomcat-9.0.55
+      state: absent
+  - name: unzipping file
+    tags:
+    - install
+    shell: unzip /opt/apache-tomcat-9.0.55.zip
+  - name: Remove tomcat existed folder
+    tags:
+    - install
+    file:
+      path: /opt/apache-tomcat-9.0.55
+      state: absent
+  - name: Moving
+    tags:
+    - install
+    shell: mv /home/ansible/apache-tomcat-9.0.55 /opt/
+  - name: add u+x permissions
+    tags:
+    - install
+    shell: chmod u+x /opt/apache-tomcat-9.0.55/bin/*.sh
+  - name: start Tomcat
+    tags:
+    - install
+    shell: nohup /opt/apache-tomcat-9.0.55/bin/startup.sh
+  - name: stop Tomcat
+    tags:
+    - uninstall
+    shell: nohup /opt/apache-tomcat-9.0.55/bin/shutdown.sh
