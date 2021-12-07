@@ -1,4 +1,4 @@
-- hosts: 172.31.15.83
+- hosts: 172.31.9.154  
   become: yes
   tasks:
   - name: Create Devops User

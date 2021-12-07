@@ -1,4 +1,5 @@
-- hosts: sq
+- hosts: 172.31.9.154
+  become: yes
   tasks:
   - name: Download Java JDK
     get_url:

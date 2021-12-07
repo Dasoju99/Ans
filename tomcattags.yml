@@ -1,7 +1,10 @@
 #ansible-playbook tomcattags.yml --tags install
-
-- hosts: 172.31.3.116 
+#start
+#stop
+- hosts: 172.31.12.47
   become: yes
+  vars:  
+    prt: 7500
   tasks:
   - name: install open JDK
     tags:
@@ -39,11 +42,79 @@
     tags:
     - install
     shell: chmod u+x /opt/apache-tomcat-9.0.55/bin/*.sh
-  - name: start Tomcat
+
+  - name: change port of tomcat from 8080 to {{prt}}
     tags:
     - install
+    replace:
+      regexp: <Connector port="8080"  
+      replace: <Connector port="{{prt}}" 
+      path: /opt/apache-tomcat-9.0.55/conf/server.xml
+  - name: Remove MANAGER APP content 1 from Context.xml file
+    tags:
+    - install
+    replace:
+      regexp: <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+      replace: " "
+      path: /opt/apache-tomcat-9.0.55/webapps/manager/META-INF/context.xml
+   
+  - name: Remove MANAGER APP content 2 from Context.xml file
+    tags:
+    - install
+    replace:
+      regexp: allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
+      replace: " "           
+      path: /opt/apache-tomcat-9.0.55/webapps/manager/META-INF/context.xml 
+
+  - name: Remove HOST MANAGER APP content 1 from Context.xml file
+    tags:
+    - install
+    replace:
+      regexp: <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+      replace: " "
+      path: /opt/apache-tomcat-9.0.55/webapps/host-manager/META-INF/context.xml
+
+  - name: Remove HOST MANAGER APP content 2 from Context.xml file
+    tags:
+    - install
+    replace:
+      regexp: allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" />
+      replace: " "
+      path: /opt/apache-tomcat-9.0.55/webapps/host-manager/META-INF/context.xml
+
+
+  - name: adding manager-gui & admin-gui in tomcat-users.xml file
+    tags:
+    - install
+    replace:
+      regexp: </tomcat-users>
+      replace: <user username="Dasoju" password="96321" roles="manager-gui,admin-gui"/> 
+      path: /opt/apache-tomcat-9.0.55/conf/tomcat-users.xml
+  - name: adding ending tag in tomcat-users.xml file
+    tags:
+    - install
+    lineinfile:
+      path: /opt/apache-tomcat-9.0.55/conf/tomcat-users.xml
+      line: </tomcat-users>
+      insertbefore: EOF
+  - name: start Tomcat
+    tags:
+    - start
     shell: nohup /opt/apache-tomcat-9.0.55/bin/startup.sh
+    register: status
+  - name: Print satus
+    tags:
+    - start
+    debug:
+      var: status.stdout
   - name: stop Tomcat
     tags:
-    - uninstall
+    - stop
     shell: nohup /opt/apache-tomcat-9.0.55/bin/shutdown.sh
+    register: stopstatus
+  - name: Print satus
+    tags:
+    - stop
+    debug:
+      var: stopstatus
+

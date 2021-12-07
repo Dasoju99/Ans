@@ -1,5 +1,5 @@
 
-- hosts: self
+- hosts: 172.31.9.154
   become: yes
   tasks:
   - name: Installation of packages
@@ -12,5 +12,5 @@
     - unzip
     - wget
     - git
-
+    - tar
 

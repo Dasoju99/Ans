@@ -1,4 +1,4 @@
-- hosts: new
+- hosts: 172.31.12.47
   become: yes
   tasks:
   - name: Remove maven existed zip file
@@ -44,4 +44,8 @@
   - name: Print Maven Installation Details
     debug:
       msg: "Maven Installed Successfully"
-
+  - name: mvn version
+    shell: mvn -version
+    args:
+      chdir: /opt/apache-maven-3.8.4/ 
+      executable: /home/ansible/.bash_profile
